@@ -13,10 +13,13 @@ app.use((req, res) => {
   });
 
 // General error handler
-// app.use((err, req, res, next) => {
-//     if (err.status && err.message) {
-//         res.status(err.status).send({ message: err.message })
-//     };
-// });
+app.use((err, req, res, next) => {
+    if (err.status && err.message) {
+        res.status(err.status).send({ message: err.message })
+    }
+    else {
+      res.status(500).send({ message: 'Internal Server Error '});
+    };
+});
 
 module.exports = app;

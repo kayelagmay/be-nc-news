@@ -22,6 +22,14 @@ describe("GET /api", () => {
         expect(endpoints).toEqual(endpointsJson);
       });
   });
+  test("404: Responds with Endpoint Not Found when the endpoint is incorrect/non-existent", () => {
+    return request(app)
+      .get('/ap')
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.message).toBe('Endpoint Not Found');
+      });
+  });
 });
 
 describe("GET /api/topics", () => {
@@ -31,28 +39,11 @@ describe("GET /api/topics", () => {
       .expect(200)
       .then(({ body }) => {
         const { topics }  = body;
-        expect(Array.isArray(topics)).toBe(true);
+        expect(topics.length).toBeGreaterThan(0);
         topics.forEach((topic) => {
           expect(topic).toHaveProperty('slug');
           expect(topic).toHaveProperty('description');
         })
       });
     });
-  test("404: Responds with Endpoint Not Found when the endpoint is incorrect", () => {
-  return request(app)
-    .get('/api/topis')
-    .expect(404)
-    .then(({ body }) => {
-      expect(body.message).toBe('Endpoint Not Found');
-    });
-  });
 });
-
-// test("500: Responds with Internal Server Error when a database query fails", () => {
-//   return request(app)
-//     .get('/api/topics')
-//     .expect(500)
-//     .then(({ body }) => {
-//       expect(body.msg).toBe('Internal Server Error');
-//     });
-// });
