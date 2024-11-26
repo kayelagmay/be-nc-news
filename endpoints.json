@@ -25,5 +25,16 @@
         }
       ]
     }
+  },
+  "GET /api/articles/:article_id": {
+    "description": "serves an article object by its id",
+    "queries": [],
+    "exampleResponse": {
+      "articles": [
+        {
+          "article_id": ""
+        }
+      ]
+    }
   }
 }

@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const { getApi, getTopics } = require('./controller');
+const { getApi, getTopics, getArticles } = require('./controller');
 
 // app.use(express.json());
 
@@ -8,9 +8,7 @@ app.get('/api', getApi);
 
 app.get('/api/topics', getTopics);
 
-app.use((req, res) => {
-    res.status(404).send({ message: 'Endpoint Not Found' });
-  });
+app.get('/api/articles/:article_id', getArticles);
 
 // General error handler
 app.use((err, req, res, next) => {
@@ -20,6 +18,11 @@ app.use((err, req, res, next) => {
     else {
       res.status(500).send({ message: 'Internal Server Error '});
     };
+});
+
+// Catch-all for unknown routes
+app.all("*", (req, res) => {
+  res.status(404).send({ message: "Endpoint Not Found" });
 });
 
 module.exports = app;
