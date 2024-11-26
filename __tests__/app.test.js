@@ -47,3 +47,39 @@ describe("GET /api/topics", () => {
       });
     });
 });
+
+describe.only("GET /api/articles/:article_id", () => {
+  test("200: Responds with an article object containing the correct properties", () => {
+    return request(app)
+      .get("/api/articles/1")
+      .expect(200)
+      .then(({ body }) => {
+        const { article }  = body;
+        expect(article).toHaveProperty('author');
+        expect(article).toHaveProperty('title');
+        expect(article).toHaveProperty('article_id');
+        expect(article).toHaveProperty('body');
+        expect(article).toHaveProperty('topic');
+        expect(article).toHaveProperty('created_at');
+        expect(article).toHaveProperty('votes');
+        expect(article).toHaveProperty('article_img_url');
+      })
+  });
+  test("404: Responds with Not Found when passed an incorrect/non-existent article_id", () => {
+    return request(app)
+      .get('/api/articles/100')
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.message).toBe('Not Found: no article found for article_id 100');
+      });
+  });
+  test("400: Responds with Bad Request when passed an invalid article_id", () => {
+    return request(app)
+      .get('/api/articles/NaN')
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe('Bad Request: article_id must be a number');
+      });
+  });
+});
+
