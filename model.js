@@ -9,7 +9,34 @@ exports.fetchAllTopics = () => {
     });
 };
 
-exports.fetchArticlesById = (article_id) => {
+exports.fetchAllArticles = (sort_by = "created_at", order_by = "desc") => {
+  const validSortBy = ["article_id", "author", "title", "topic", "created_at", "votes"];
+  const validOrderBy = ["asc", "desc"];
+  if (!validSortBy.includes(sort_by) || !validOrderBy.includes(order_by)) {
+    return Promise.reject({ status: 400, message: "Bad Request: Invalid Query"})
+  }
+  return db
+  .query(`SELECT 
+    articles.article_id,
+    articles.title,
+    articles.topic,
+    articles.author,
+    articles.created_at,
+    articles.votes,
+    articles.article_img_url,
+    COUNT (comments.comment_id) AS comment_count
+    FROM articles
+    JOIN comments
+    ON articles.article_id = comments.article_id
+    GROUP BY articles.article_id
+    ORDER BY ${sort_by} ${order_by};`)
+  .then((results) => {
+    return results.rows;
+  });
+};
+
+
+exports.fetchArticleById = (article_id) => {
   return db
   .query(`SELECT * FROM articles
     WHERE article_id = $1;`,

@@ -1,21 +1,31 @@
-const endpointsJson = require("./endpoints.json");
-const { fetchAllTopics, fetchArticlesById } = require('./model');
+const endpointsJson = require("./endpoints.json")
+const { fetchAllTopics, fetchAllArticles, fetchArticleById } = require('./model');
 
 // GET /api
 exports.getApi = (req, res) => {
-    res.status(200).send({ endpoints: endpointsJson })
+  res.status(200).send({ endpoints: endpointsJson })
 };
 
 // GET /api/topics
-exports.getTopics = (req, res, next) => {
-    fetchAllTopics()
-      .then((topics) => {
-        res.status(200).send({ topics });
-      });
+exports.getAllTopics = (req, res, next) => {
+  fetchAllTopics()
+    .then((topics) => {
+      res.status(200).send({ topics });
+    });
+};
+
+// GET /api/articles
+exports.getAllArticles = (req, res, next) => {
+  const { sort_by, order_by } = req.query
+      fetchAllArticles(sort_by, order_by)
+      .then((articles) => {
+        res.status(200).send({ articles });
+      })
+      .catch(next);
 };
 
 // GET /api/articles/:article_id
-exports.getArticles = (req, res, next) => {
+exports.getArticle = (req, res, next) => {
   const { article_id } = req.params;
   if (isNaN(Number(article_id))) {
     return next({
@@ -23,7 +33,7 @@ exports.getArticles = (req, res, next) => {
       message: "Bad Request: article_id must be a number"
     });
   };
-  fetchArticlesById(article_id)
+  fetchArticleById(article_id)
   .then((article) => {
     res.status(200).send({ article });
   })

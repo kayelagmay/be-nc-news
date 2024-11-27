@@ -48,7 +48,7 @@ describe("GET /api/topics", () => {
     });
 });
 
-describe.only("GET /api/articles/:article_id", () => {
+describe("GET /api/articles/:article_id", () => {
   test("200: Responds with an article object containing the correct properties", () => {
     return request(app)
       .get("/api/articles/1")
@@ -83,3 +83,43 @@ describe.only("GET /api/articles/:article_id", () => {
   });
 });
 
+describe("GET /api/articles", () => {
+  test("200: Responds with an array of article objects containing the correct properties, and excluding the body property", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body }) => {
+        const { articles }  = body;
+        expect(articles.length).toBeGreaterThan(0);
+        articles.forEach((article) => {
+        expect(article).toHaveProperty('article_id');
+        expect(article).toHaveProperty('title');
+        expect(article).toHaveProperty('topic');
+        expect(article).toHaveProperty('author');
+        expect(article).toHaveProperty('created_at');
+        expect(article).toHaveProperty('votes');
+        expect(article).toHaveProperty('article_img_url');
+        expect(article).toHaveProperty('comment_count');
+        
+        expect(article.body).toBeUndefined();
+        });
+      });
+  });
+  test("200: Responds with an array sorted by created_at in descending order", () => {
+    return request(app)
+    .get("/api/articles")
+    .expect(200)
+    .then(({ body })=>{
+      const { articles } = body;
+      expect(articles).toBeSortedBy('created_at', { descending: true });
+    });
+  });
+  test("400: Responds with Bad Request: Invalid Query when passed an invalid sort_by or order_by query ", () => {
+    return request(app)
+    .get("/api/articles?sort_by=name")
+    .expect(400)
+    .then(({ body })=>{
+      expect(body.message).toBe('Bad Request: Invalid Query')
+    });
+  });
+});
