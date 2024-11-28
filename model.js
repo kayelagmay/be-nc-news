@@ -1,7 +1,7 @@
 const db = require('./db/connection');
 const format = require('pg-format');
 
-// Re-usable helper functions
+// Re-usable helper function
 exports.checkArticleExists = (article_id) => {
   return db
   .query('SELECT * FROM articles WHERE article_id = $1', [article_id])
@@ -14,6 +14,8 @@ exports.checkArticleExists = (article_id) => {
     };
   });
 };
+
+// Re-usable helper function
 exports.checkCommentExists = (comment_id) => {
   return db
   .query('SELECT * FROM comments WHERE comment_id = $1', [comment_id])
@@ -35,7 +37,12 @@ exports.fetchAllTopics = () => {
     });
 };
 
-exports.fetchAllArticles = () => {
+exports.fetchAllArticles = (sort_by = "created_at", order_by = "DESC") => {
+  const validSortBy = ["article_id", "author", "title", "topic", "created_at", "votes", "article_img_url"];
+  const validOrderBy = ["ASC", "DESC"];
+  if (!validSortBy.includes(sort_by) || !validOrderBy.includes(order_by)) {
+    return Promise.reject({ status: 400, message: "Bad Request: Invalid Query"})
+  }
   return db
   .query(`SELECT 
     articles.article_id,
@@ -50,7 +57,7 @@ exports.fetchAllArticles = () => {
     LEFT JOIN comments
     ON articles.article_id = comments.article_id
     GROUP BY articles.article_id
-    ORDER BY created_at DESC ;`)
+    ORDER BY ${sort_by} ${order_by};`)
   .then((results) => {
     return results.rows;
   });
