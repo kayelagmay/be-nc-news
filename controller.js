@@ -27,7 +27,8 @@ exports.getAllTopics = (req, res, next) => {
 
 // GET /api/articles
 exports.getAllArticles = (req, res, next) => {
-  fetchAllArticles()
+  const { sort_by, order_by } = req.query
+  fetchAllArticles(sort_by, order_by)
   .then((articles) => {
     res.status(200).send({ articles });
   })
