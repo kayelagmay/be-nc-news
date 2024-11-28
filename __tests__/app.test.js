@@ -193,7 +193,6 @@ describe("POST /api/articles/:article_id/comments", () => {
       })
       .expect(201)
       .then(({ body }) => {
-        console.log(body)
         const { comment } = body
         expect(comment).toMatchObject({
           author: "butter_bridge",
@@ -284,6 +283,32 @@ describe("PATCH /api/articles/:article_id/", () => {
       .expect(404)
       .then(({ body }) => {
         expect(body.message).toBe("Not Found: no article found for article_id 962");
+      });
+  });
+});
+
+describe("DELETE /api/comments/:comment_id", () => {
+  test("204: Responds with no content when the comment is deleted successfully", () => {
+    return request(app)
+      .delete("/api/comments/1")
+      .expect(204);
+  });
+
+  test("404: Responds with Not Found when comment_id does not exist", () => {
+    return request(app)
+      .delete("/api/comments/924")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.message).toBe("Not Found: no comment found for comment_id 924");
+      });
+  });
+
+  test("400: Responds with Bad Request when comment_id is invalid data type", () => {
+    return request(app)
+      .delete("/api/comments/NaN")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("Bad Request: comment_id must be a number");
       });
   });
 });
