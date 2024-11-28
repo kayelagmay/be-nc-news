@@ -27,7 +27,7 @@ describe("GET /api", () => {
       .get('/ap')
       .expect(404)
       .then(({ body }) => {
-        expect(body.message).toBe('Endpoint Not Found');
+        expect(body.message).toBe('Error: Endpoint Not Found');
       });
   });
 });
@@ -114,14 +114,6 @@ describe("GET /api/articles", () => {
       expect(articles).toBeSortedBy('created_at', { descending: true });
     });
   });
-  // test("400: Responds with Bad Request: Invalid Query when passed an invalid sort_by or order_by query ", () => {
-  //   return request(app)
-  //   .get("/api/articles?sort_by=name")
-  //   .expect(400)
-  //   .then(({ body })=>{
-  //     expect(body.message).toBe('Bad Request: Invalid Query')
-  //   });
-  // });
 });
 
 describe("GET /api/articles/:article_id/comments", () => {
@@ -240,6 +232,58 @@ describe("POST /api/articles/:article_id/comments", () => {
       .expect(404)
       .then(({ body }) => {
         expect(body.message).toBe("Not Found: no article found for article_id 923")
+      });
+  });
+});
+
+describe("PATCH /api/articles/:article_id/", () => {
+  test("200: Responds with the updated article", () => {
+    return request(app)
+      .patch("/api/articles/1")
+      .send({
+        inc_votes: 3
+      })
+      .expect(200)
+      .then(({ body }) => {
+        const { article } = body
+        expect(article.article_id).toBe(1)
+        expect(article.votes).toBe(103)
+        });
+  });
+  test("400: Responds with Bad Request when inc_votes is missing", () => {
+    return request(app)
+      .patch("/api/articles/1")
+      .send({})
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("Bad Request: inc_votes is required")
+      });
+  });
+  test("400: Responds with Bad Request when inc_votes is not a number", () => {
+    return request(app)
+      .patch("/api/articles/1")
+      .send({ inc_votes: "two" })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("Bad Request: inc_votes must be a number");
+      });
+  });
+  test("400: Responds with Bad Request when passed an invalid article_id", () => {
+    return request(app)
+      .patch("/api/articles/NaN")
+      .send({ inc_votes: 1 })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("Bad Request: article_id must be a number")
+      });
+  });
+  test("404: Responds with Not Found when passed a non-existent article_id", () => {
+    return request(app)
+      .patch("/api/articles/962")
+      .send({ inc_votes: 1 })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.message).toBe("Not Found: no article found for article_id 962");
       });
   });
 });

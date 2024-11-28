@@ -6,7 +6,9 @@ const {
   getAllArticles,
   getArticle,
   getComments,
-  postComments} = require('./controller');
+  postComments,
+  patchArticle
+} = require('./controller');
 
 app.use(express.json());
 
@@ -22,6 +24,8 @@ app.get('/api/articles/:article_id/comments', getComments);
 
 app.post('/api/articles/:article_id/comments', postComments);
 
+app.patch('/api/articles/:article_id', patchArticle);
+
 // General error handler
 app.use((err, req, res, next) => {
     if (err.status && err.message) {
@@ -34,7 +38,7 @@ app.use((err, req, res, next) => {
 
 // Catch-all for unknown routes
 app.all("*", (req, res) => {
-  res.status(404).send({ message: "Endpoint Not Found" });
+  res.status(404).send({ message: "Error: Endpoint Not Found" });
 });
 
 module.exports = app;

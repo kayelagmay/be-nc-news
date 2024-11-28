@@ -77,5 +77,21 @@
         "created_at": 1705125460000
       }
     }
+  },
+  "PATCH /api/articles/:article_id": {
+  "description": "updates the vote count for a specific article by article_id. 'inc_votes' specifies the number of votes to increment or decrement by",
+  "queries": [],
+  "requestBodyFormat": {
+    "inc_votes": "integer"
+    },
+  "exampleResponse": {
+    "article_id": 17,
+    "title": "Living in the shadow of a great man",
+    "topic": "mitch",
+    "author": "butter_bridge",
+    "created_at": 1594329060000,
+    "votes": 120,
+    "article_img_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+    }
   }
 }
