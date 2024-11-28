@@ -1,10 +1,12 @@
 const endpointsJson = require("./endpoints.json")
 const { 
+  checkArticleExists,
   fetchAllTopics,
   fetchAllArticles,
   fetchArticleById,
   fetchCommentsByArticleId,
-  insertComment
+  insertComment,
+  updateVotes
  } = require('./model');
 
 // GET /api
@@ -55,7 +57,10 @@ exports.getComments = (req, res, next) => {
       message: "Bad Request: article_id must be a number"
     });
   };
-  fetchCommentsByArticleId(article_id)
+  checkArticleExists(article_id)
+  .then(() => {
+    return fetchCommentsByArticleId(article_id)
+  })
   .then((comments) => {
     res.status(200).send({ comments });
   })
@@ -78,12 +83,44 @@ exports.postComments = (req, res, next) => {
       message: "Bad Request: username and body are required"
     });
   };
-  fetchArticleById(article_id)
+  checkArticleExists(article_id)
   .then(() => {
-  return insertComment(article_id, username, body);
+    return insertComment(article_id, username, body);
   })
   .then((newComment) => {
     res.status(201).send({ comment: newComment });
   })
   .catch(next);
 };
+
+// PATCH /api/articles/:article_id
+exports.patchArticle = (req, res, next) => {
+  const { article_id } = req.params;
+  const { inc_votes } = req.body;
+  if (inc_votes === undefined) {
+    return next({
+      status: 400,
+      message: "Bad Request: inc_votes is required"
+    });
+  };
+  if (typeof inc_votes !== "number") {
+    return next({
+      status: 400,
+      message: "Bad Request: inc_votes must be a number",
+    });
+  };
+  if (isNaN(Number(article_id))) {
+    return next({
+      status: 400,
+      message: "Bad Request: article_id must be a number",
+    });
+  }; 
+  checkArticleExists(article_id)
+  .then(() => {
+    return updateVotes(inc_votes, article_id)
+  })
+  .then((article) => {
+    res.status(200).send({ article });
+  })
+  .catch(next)
+}

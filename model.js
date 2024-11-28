@@ -51,7 +51,7 @@ exports.fetchArticleById = (article_id) => {
   });
 };
 
-exports.fetchCommentsByArticleId = (article_id) => {
+exports.checkArticleExists = (article_id) => {
   return db
   .query('SELECT * FROM articles WHERE article_id = $1', [article_id])
   .then((result) => {
@@ -60,22 +60,25 @@ exports.fetchCommentsByArticleId = (article_id) => {
         status: 404,
         message: `Not Found: no article found for article_id ${article_id}`
       });
-    }
-    return db
-    .query(`SELECT 
-      comment_id,
-      votes,
-      created_at,
-      author,
-      body,
-      article_id
-      FROM comments
-      WHERE article_id = $1
-      ORDER BY created_at DESC;`, 
-      [article_id])
-    .then((results) => {
-      return results.rows;
-    });
+    };
+  });
+};
+
+exports.fetchCommentsByArticleId = (article_id) => {
+  return db
+  .query(`SELECT 
+    comment_id,
+    votes,
+    created_at,
+    author,
+    body,
+    article_id
+    FROM comments
+    WHERE article_id = $1
+    ORDER BY created_at DESC;`, 
+    [article_id])
+  .then((results) => {
+    return results.rows;
   });
 };
 
@@ -90,3 +93,17 @@ exports.insertComment = (article_id, username, body) => {
     return result.rows[0];
   })
 }
+
+exports.updateVotes = (inc_votes, article_id) => {
+  return db
+  .query(`
+    UPDATE articles
+    SET votes = votes + $1
+    WHERE article_id = $2
+    RETURNING *;`,
+    [inc_votes, article_id]
+  )
+  .then((result) => {
+    return result.rows[0];
+  });
+};
