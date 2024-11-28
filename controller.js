@@ -1,12 +1,14 @@
 const endpointsJson = require("./endpoints.json")
 const { 
   checkArticleExists,
+  checkCommentExists,
   fetchAllTopics,
   fetchAllArticles,
   fetchArticleById,
   fetchCommentsByArticleId,
   insertComment,
-  updateVotes
+  updateVotes, 
+  removeCommentById
  } = require('./model');
 
 // GET /api
@@ -124,3 +126,22 @@ exports.patchArticle = (req, res, next) => {
   })
   .catch(next)
 }
+
+// DELETE /api/comments/:comment_id
+exports.deleteComments = (req, res, next) => {
+  const { comment_id } = req.params;
+  if (isNaN(Number(comment_id))) {
+    return next({
+      status: 400,
+      message: "Bad Request: comment_id must be a number",
+    });
+  };
+  checkCommentExists(comment_id)
+  .then(() => {
+    return removeCommentById(comment_id);
+  })
+  .then(() => {
+    res.status(204).send();
+  })
+  .catch(next);
+};

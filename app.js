@@ -7,7 +7,8 @@ const {
   getArticle,
   getComments,
   postComments,
-  patchArticle
+  patchArticle,
+  deleteComments
 } = require('./controller');
 
 app.use(express.json());
@@ -25,6 +26,8 @@ app.get('/api/articles/:article_id/comments', getComments);
 app.post('/api/articles/:article_id/comments', postComments);
 
 app.patch('/api/articles/:article_id', patchArticle);
+
+app.delete('/api/comments/:comment_id', deleteComments);
 
 // General error handler
 app.use((err, req, res, next) => {
