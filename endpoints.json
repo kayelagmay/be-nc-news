@@ -59,5 +59,23 @@
         }
       ]
     }
+  },
+  "POST /api/articles/:article_id/comments": {
+    "description": "adds a comment to the specified article_id and responds with the newly created comment",
+    "queries": [],
+    "requestBodyFormat": {
+      "username": "string",
+      "body": "string"
+      },
+    "exampleResponse": {
+      "comment": {
+        "comment_id": 19,
+        "body": "This is an amazing article!",
+        "article_id": 9,
+        "author": "butter_bridge",
+        "votes": 0,
+        "created_at": 1705125460000
+      }
+    }
   }
 }

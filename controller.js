@@ -1,5 +1,11 @@
 const endpointsJson = require("./endpoints.json")
-const { fetchAllTopics, fetchAllArticles, fetchArticleById, fetchCommentsByArticleId } = require('./model');
+const { 
+  fetchAllTopics,
+  fetchAllArticles,
+  fetchArticleById,
+  fetchCommentsByArticleId,
+  insertComment
+ } = require('./model');
 
 // GET /api
 exports.getApi = (req, res) => {
@@ -52,6 +58,32 @@ exports.getComments = (req, res, next) => {
   fetchCommentsByArticleId(article_id)
   .then((comments) => {
     res.status(200).send({ comments });
+  })
+  .catch(next);
+};
+
+// POST /api/articles/:article_id/comments
+exports.postComments = (req, res, next) => {
+  const { article_id } = req.params;
+  const { username, body } = req.body;
+  if (isNaN(Number(article_id))) {
+    return next({
+      status: 400,
+      message: "Bad Request: article_id must be a number",
+    });
+  };
+  if (!username || !body) {
+    return next({
+      status: 400,
+      message: "Bad Request: username and body are required"
+    });
+  };
+  fetchArticleById(article_id)
+  .then(() => {
+  return insertComment(article_id, username, body);
+  })
+  .then((newComment) => {
+    res.status(201).send({ comment: newComment });
   })
   .catch(next);
 };
