@@ -45,7 +45,40 @@ describe("GET /api/topics", () => {
           expect(topic).toHaveProperty('description');
         })
       });
-    });
+  });
+  test("404: Responds with Endpoint Not Found when the endpoint is incorrect/non-existent", () => {
+    return request(app)
+      .get('/api/topcs')
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.message).toBe('Error: Endpoint Not Found');
+      });
+  });
+});
+
+describe("GET /api/users", () => {
+  test("200: Responds with an array of users", () => {
+    return request(app)
+      .get("/api/users")
+      .expect(200)
+      .then(({ body }) => {
+        const { users }  = body;
+        expect(users.length).toBe(4);
+        users.forEach((user) => {
+          expect(user).toHaveProperty('username');
+          expect(user).toHaveProperty('name');
+          expect(user).toHaveProperty('avatar_url');
+        })
+      });
+  });
+  test("404: Responds with Endpoint Not Found when the endpoint is incorrect/non-existent", () => {
+    return request(app)
+      .get('/api/usrs')
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.message).toBe('Error: Endpoint Not Found');
+      });
+  });
 });
 
 describe("GET /api/articles/:article_id", () => {
