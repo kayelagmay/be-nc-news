@@ -35,12 +35,7 @@ exports.fetchAllTopics = () => {
     });
 };
 
-exports.fetchAllArticles = (sort_by = "created_at", order_by = "desc") => {
-  const validSortBy = ["article_id", "author", "title", "topic", "created_at", "votes"];
-  const validOrderBy = ["asc", "desc"];
-  if (!validSortBy.includes(sort_by) || !validOrderBy.includes(order_by)) {
-    return Promise.reject({ status: 400, message: "Bad Request: Invalid Query"})
-  }
+exports.fetchAllArticles = () => {
   return db
   .query(`SELECT 
     articles.article_id,
@@ -55,9 +50,17 @@ exports.fetchAllArticles = (sort_by = "created_at", order_by = "desc") => {
     LEFT JOIN comments
     ON articles.article_id = comments.article_id
     GROUP BY articles.article_id
-    ORDER BY ${sort_by} ${order_by};`)
+    ORDER BY created_at DESC ;`)
   .then((results) => {
     return results.rows;
+  });
+};
+
+exports.fetchAllUsers = () => {
+  return db
+  .query('SELECT * FROM users;')
+  .then((result) => {
+    return result.rows;
   });
 };
 

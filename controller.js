@@ -4,6 +4,7 @@ const {
   checkCommentExists,
   fetchAllTopics,
   fetchAllArticles,
+  fetchAllUsers,
   fetchArticleById,
   fetchCommentsByArticleId,
   insertComment,
@@ -26,13 +27,20 @@ exports.getAllTopics = (req, res, next) => {
 
 // GET /api/articles
 exports.getAllArticles = (req, res, next) => {
-  const { sort_by, order_by } = req.query
-      fetchAllArticles(sort_by, order_by)
-      .then((articles) => {
-        res.status(200).send({ articles });
-      })
-      .catch(next);
+  fetchAllArticles()
+  .then((articles) => {
+    res.status(200).send({ articles });
+  })
+  .catch(next);
 };
+
+// GET /api/users
+exports.getAllUsers = (req, res, next) => {
+  fetchAllUsers()
+  .then((users) => {
+    res.status(200).send({ users });
+  })
+}
 
 // GET /api/articles/:article_id
 exports.getArticle = (req, res, next) => {

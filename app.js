@@ -4,6 +4,7 @@ const {
   getApi,
   getAllTopics,
   getAllArticles,
+  getAllUsers,
   getArticle,
   getComments,
   postComments,
@@ -19,6 +20,8 @@ app.get('/api/topics', getAllTopics);
 
 app.get('/api/articles', getAllArticles);
 
+app.get('/api/users', getAllUsers);
+
 app.get('/api/articles/:article_id', getArticle);
 
 app.get('/api/articles/:article_id/comments', getComments);
@@ -28,6 +31,7 @@ app.post('/api/articles/:article_id/comments', postComments);
 app.patch('/api/articles/:article_id', patchArticle);
 
 app.delete('/api/comments/:comment_id', deleteComments);
+
 
 // General error handler
 app.use((err, req, res, next) => {
