@@ -1,8 +1,14 @@
 const express = require('express');
 const app = express();
-const { getApi, getAllTopics, getAllArticles, getArticle, getComments } = require('./controller');
+const { 
+  getApi,
+  getAllTopics,
+  getAllArticles,
+  getArticle,
+  getComments,
+  postComments} = require('./controller');
 
-// app.use(express.json());
+app.use(express.json());
 
 app.get('/api', getApi);
 
@@ -13,6 +19,8 @@ app.get('/api/articles', getAllArticles);
 app.get('/api/articles/:article_id', getArticle);
 
 app.get('/api/articles/:article_id/comments', getComments);
+
+app.post('/api/articles/:article_id/comments', postComments);
 
 // General error handler
 app.use((err, req, res, next) => {

@@ -190,3 +190,56 @@ describe("GET /api/articles/:article_id/comments", () => {
       });
   });
 });
+
+describe("POST /api/articles/:article_id/comments", () => {
+  test("201: Responds with the posted comment when successful", () => {
+    return request(app)
+      .post("/api/articles/9/comments")
+      .send({
+        username: "butter_bridge",
+        body: "Great article!"
+      })
+      .expect(201)
+      .then(({ body }) => {
+        console.log(body)
+        const { comment } = body
+        expect(comment).toMatchObject({
+          author: "butter_bridge",
+          body: "Great article!",
+          article_id: 9
+        });
+        expect(comment).toHaveProperty("comment_id");
+        expect(comment).toHaveProperty("created_at");
+        expect(comment).toHaveProperty("votes");
+      });
+  });
+  test("400: Responds with Bad Request when passed an invalid article_id", () => {
+    return request(app)
+      .post("/api/articles/NaN/comments")
+      .send()
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("Bad Request: article_id must be a number")
+      });
+  });
+  test("400: Responds with Bad Request when username or body is missing from request body", () => {
+    const invalidBody = { username: "butter_bridge" }
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send(invalidBody)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("Bad Request: username and body are required")
+    });
+  });
+  test("404: Responds with Not Found when passed a non-existent article_id", () => {
+    const body = { username: "butter_bridge", body: "Great article!" }
+    return request(app)
+      .post("/api/articles/923/comments")
+      .send(body)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.message).toBe("Not Found: no article found for article_id 923")
+      });
+  });
+});
