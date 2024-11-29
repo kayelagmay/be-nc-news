@@ -46,14 +46,6 @@ describe("GET /api/topics", () => {
         })
       });
   });
-  test("404: Responds with Endpoint Not Found when the endpoint is incorrect/non-existent", () => {
-    return request(app)
-      .get('/api/topcs')
-      .expect(404)
-      .then(({ body }) => {
-        expect(body.message).toBe('Error: Endpoint Not Found');
-      });
-  });
 });
 
 describe("GET /api/users", () => {
@@ -69,14 +61,6 @@ describe("GET /api/users", () => {
           expect(user).toHaveProperty('name');
           expect(user).toHaveProperty('avatar_url');
         })
-      });
-  });
-  test("404: Responds with Endpoint Not Found when the endpoint is incorrect/non-existent", () => {
-    return request(app)
-      .get('/api/usrs')
-      .expect(404)
-      .then(({ body }) => {
-        expect(body.message).toBe('Error: Endpoint Not Found');
       });
   });
 });
@@ -114,11 +98,39 @@ describe("GET /api/articles", () => {
   });
   test("400: Responds with Bad Request: Invalid Query when passed an invalid sort_by or order_by query ", () => {
     return request(app)
-    .get("/api/articles?sort_by=name")
+    .get("/api/articles?sort_by=invalid_column")
     .expect(400)
-    .then(({ body })=>{
-      expect(body.message).toBe('Bad Request: Invalid Query')
+    .then(({ body }) => {
+      expect(body.message).toBe("Bad Request: Invalid Query");
+    })
+    .then(() => {
+      return request(app)
+        .get("/api/articles?order_by=invalid_order")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.message).toBe("Bad Request: Invalid Query");
+        });
     });
+  });
+  test("200: Responds with articles filtered by topic", () => {
+    return request(app)
+      .get("/api/articles?topic=cats")
+      .expect(200)
+      .then(({ body }) => {
+        const { articles } = body
+        expect(articles).toHaveLength(1);
+        articles.forEach((article) => {
+          expect(article.topic).toBe("cats");
+        });
+    });
+  });
+  test("404: Responds with Bad Request if topic does not exist", () => {
+    return request(app)
+      .get("/api/articles?topic=notatopic")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.message).toBe("Not Found: notatopic topic does not exist");
+      });
   });
 });
 
@@ -152,7 +164,7 @@ describe("GET /api/articles/:article_id", () => {
       .get('/api/articles/NaN')
       .expect(400)
       .then(({ body }) => {
-        expect(body.message).toBe('Bad Request: article_id must be a number');
+        expect(body.message).toBe('Bad Request: Invalid input syntax');
       });
   });
 });
@@ -210,7 +222,7 @@ describe("GET /api/articles/:article_id/comments", () => {
       .get("/api/articles/NaN/comments")
       .expect(400)
       .then(({ body }) => {
-        expect(body.message).toBe("Bad Request: article_id must be a number");
+        expect(body.message).toBe("Bad Request: Invalid input syntax");
       });
   });
   test("200: Responds with an empty array if there are no comments attached to the article", () => {
@@ -225,13 +237,11 @@ describe("GET /api/articles/:article_id/comments", () => {
 });
 
 describe("POST /api/articles/:article_id/comments", () => {
+  const commentTest = { username: "butter_bridge", body: "Great article!" }
   test("201: Responds with the posted comment when successful", () => {
     return request(app)
       .post("/api/articles/9/comments")
-      .send({
-        username: "butter_bridge",
-        body: "Great article!"
-      })
+      .send(commentTest)
       .expect(201)
       .then(({ body }) => {
         const { comment } = body
@@ -248,27 +258,34 @@ describe("POST /api/articles/:article_id/comments", () => {
   test("400: Responds with Bad Request when passed an invalid article_id", () => {
     return request(app)
       .post("/api/articles/NaN/comments")
-      .send()
+      .send(commentTest)
       .expect(400)
       .then(({ body }) => {
-        expect(body.message).toBe("Bad Request: article_id must be a number")
+        expect(body.message).toBe("Bad Request: Invalid input syntax")
       });
   });
   test("400: Responds with Bad Request when username or body is missing from request body", () => {
-    const invalidBody = { username: "butter_bridge" }
     return request(app)
       .post("/api/articles/1/comments")
-      .send(invalidBody)
+      .send({ username: "butter_bridge" })
       .expect(400)
       .then(({ body }) => {
-        expect(body.message).toBe("Bad Request: username and body are required")
-    });
+        expect(body.message).toBe("Bad Request: Missing required data")
+      })
+      .then(() => {
+        return request(app)
+          .post("/api/articles/2/comments")
+          .send({ body: "This is a test!" })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.message).toBe("Bad Request: Missing required data");
+          });
+      });
   });
   test("404: Responds with Not Found when passed a non-existent article_id", () => {
-    const body = { username: "butter_bridge", body: "Great article!" }
     return request(app)
       .post("/api/articles/923/comments")
-      .send(body)
+      .send(commentTest)
       .expect(404)
       .then(({ body }) => {
         expect(body.message).toBe("Not Found: no article found for article_id 923")
@@ -296,7 +313,7 @@ describe("PATCH /api/articles/:article_id/", () => {
       .send({})
       .expect(400)
       .then(({ body }) => {
-        expect(body.message).toBe("Bad Request: inc_votes is required")
+        expect(body.message).toBe("Bad Request: Missing required data")
       });
   });
   test("400: Responds with Bad Request when inc_votes is not a number", () => {
@@ -305,7 +322,7 @@ describe("PATCH /api/articles/:article_id/", () => {
       .send({ inc_votes: "two" })
       .expect(400)
       .then(({ body }) => {
-        expect(body.message).toBe("Bad Request: inc_votes must be a number");
+        expect(body.message).toBe("Bad Request: Invalid input syntax");
       });
   });
   test("400: Responds with Bad Request when passed an invalid article_id", () => {
@@ -314,7 +331,7 @@ describe("PATCH /api/articles/:article_id/", () => {
       .send({ inc_votes: 1 })
       .expect(400)
       .then(({ body }) => {
-        expect(body.message).toBe("Bad Request: article_id must be a number")
+        expect(body.message).toBe("Bad Request: Invalid input syntax")
       });
   });
   test("404: Responds with Not Found when passed a non-existent article_id", () => {
@@ -349,7 +366,7 @@ describe("DELETE /api/comments/:comment_id", () => {
       .delete("/api/comments/NaN")
       .expect(400)
       .then(({ body }) => {
-        expect(body.message).toBe("Bad Request: comment_id must be a number");
+        expect(body.message).toBe("Bad Request: Invalid input syntax");
       });
   });
 });

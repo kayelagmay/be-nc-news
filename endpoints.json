@@ -20,12 +20,17 @@
       {
         "name": "sort_by",
         "description": "The column to sort the articles by. Defaults to 'created_at'. Can be any valid column name such as 'title', 'author', etc",
-        "example": "sort_by=created_at"
+        "example": "sort_by = created_at"
       },
       {
         "name": "order_by",
         "description": "The order in which to sort the articles. Defaults to 'desc' (descending). Can be 'asc' (ascending) or 'desc' (descending)",
-        "example": "order_by=desc"
+        "example": "order_by = desc"
+      },
+      {
+        "name": "topic",
+        "description": "Filters the articles by the specified topic. If omitted, all articles are returned.",
+        "example": "topic = cats"
       }
     ],
     "exampleResponse": {

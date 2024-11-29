@@ -16,14 +16,14 @@ exports.checkArticleExists = (article_id) => {
 };
 
 // Re-usable helper function
-exports.checkCommentExists = (comment_id) => {
+exports.checkTopicExists = (topic) => {
   return db
-  .query('SELECT * FROM comments WHERE comment_id = $1', [comment_id])
+  .query('SELECT * FROM topics WHERE slug = $1', [topic])
   .then((result) => {
     if (result.rows.length === 0) {
       return Promise.reject({
         status: 404,
-        message: `Not Found: no comment found for comment_id ${comment_id}`
+        message: `Not Found: ${topic} topic does not exist`
       });
     };
   });
@@ -37,14 +37,13 @@ exports.fetchAllTopics = () => {
     });
 };
 
-exports.fetchAllArticles = (sort_by = "created_at", order_by = "DESC") => {
+exports.fetchAllArticles = (sort_by = "created_at", order_by = "DESC", topic) => {
   const validSortBy = ["article_id", "author", "title", "topic", "created_at", "votes", "article_img_url"];
   const validOrderBy = ["ASC", "DESC"];
   if (!validSortBy.includes(sort_by) || !validOrderBy.includes(order_by)) {
     return Promise.reject({ status: 400, message: "Bad Request: Invalid Query"})
-  }
-  return db
-  .query(`SELECT 
+  };
+  let query = `SELECT 
     articles.article_id,
     articles.title,
     articles.topic,
@@ -55,9 +54,17 @@ exports.fetchAllArticles = (sort_by = "created_at", order_by = "DESC") => {
     COUNT (comments.comment_id) AS comment_count
     FROM articles
     LEFT JOIN comments
-    ON articles.article_id = comments.article_id
-    GROUP BY articles.article_id
-    ORDER BY ${sort_by} ${order_by};`)
+    ON articles.article_id = comments.article_id`;
+  const queryValues = [];
+  if (topic) {
+    query += ` WHERE articles.topic = $1`;
+    queryValues.push(topic)
+  }
+  query += `
+  GROUP BY articles.article_id
+  ORDER BY ${sort_by} ${order_by};`
+  return db
+  .query(query, queryValues)
   .then((results) => {
     return results.rows;
   });
@@ -135,7 +142,16 @@ exports.removeCommentById = (comment_id) => {
   return db
   .query(`
     DELETE FROM comments
-    WHERE comment_id = $1;`,
+    WHERE comment_id = $1
+    RETURNING *;`,
     [comment_id]
-  );
+  )
+  .then((result) => {
+    if (result.rows.length === 0) {
+      return Promise.reject({
+        status: 404,
+        message: `Not Found: no comment found for comment_id ${comment_id}`
+      });
+    };
+  });
 };
