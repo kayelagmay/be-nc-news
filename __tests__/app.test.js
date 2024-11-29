@@ -87,13 +87,22 @@ describe("GET /api/articles", () => {
         });
       });
   });
-  test("200: Responds with an array sorted by created_at in descending order", () => {
+  test("200: Responds with an array of articles sorted by default values created_at in descending order", () => {
     return request(app)
     .get("/api/articles")
     .expect(200)
     .then(({ body })=>{
       const { articles } = body;
       expect(articles).toBeSortedBy('created_at', { descending: true });
+    });
+  });
+  test("200: Responds with an array of articles sorted and ordered by user query", () => {
+    return request(app)
+    .get("/api/articles?sort_by=title&order_by=ASC")
+    .expect(200)
+    .then(({ body })=>{
+      const { articles } = body;
+      expect(articles).toBeSortedBy('title', { descending: false });
     });
   });
   test("400: Responds with Bad Request: Invalid Query when passed an invalid sort_by or order_by query ", () => {
