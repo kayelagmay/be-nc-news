@@ -158,6 +158,7 @@ describe("GET /api/articles/:article_id", () => {
         expect(article).toHaveProperty('created_at');
         expect(article).toHaveProperty('votes');
         expect(article).toHaveProperty('article_img_url');
+        expect(article).toHaveProperty('comment_count');
       })
   });
   test("404: Responds with Not Found when passed an incorrect/non-existent article_id", () => {
