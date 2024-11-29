@@ -1,6 +1,6 @@
 # Northcoders News API
 
-Live Link: [NC News API](https://nc-news-zelj.onrender.com/api)
+Link to Project: [NC News API](https://nc-news-zelj.onrender.com/api)
 
 ## Project Summary
 
