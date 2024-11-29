@@ -13,6 +13,17 @@ beforeEach(() => {
   return seed(testData);
 });
 
+describe("Invalid Endpoint", () => {
+  test("404: Responds with Endpoint Not Found when the endpoint is incorrect/non-existent", () => {
+    return request(app)
+      .get('/ap')
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.message).toBe('Error: Endpoint Not Found');
+      });
+  });
+});
+
 describe("GET /api", () => {
   test("200: Responds with an object detailing the documentation for each endpoint", () => {
     return request(app)
@@ -20,14 +31,6 @@ describe("GET /api", () => {
       .expect(200)
       .then(({ body: { endpoints } }) => {
         expect(endpoints).toEqual(endpointsJson);
-      });
-  });
-  test("404: Responds with Endpoint Not Found when the endpoint is incorrect/non-existent", () => {
-    return request(app)
-      .get('/ap')
-      .expect(404)
-      .then(({ body }) => {
-        expect(body.message).toBe('Error: Endpoint Not Found');
       });
   });
 });
