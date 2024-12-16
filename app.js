@@ -1,3 +1,4 @@
+const cors = require('cors');
 const express = require('express');
 const app = express();
 const { 
@@ -11,6 +12,8 @@ const {
   patchArticle,
   deleteComments
 } = require('./controller');
+
+app.use(cors());
 
 app.use(express.json());
 
